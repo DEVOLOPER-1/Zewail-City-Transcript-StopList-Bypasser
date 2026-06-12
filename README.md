@@ -38,5 +38,9 @@ Notes
 - This repository contains vendored Brython runtime files to allow the viewer to run without external network requests.
 - Keep distribution and sharing in line with institutional policies; this tool is intended for internal use.
 
-License and authorship
-- See project metadata and repository history for author and license information.
+
+
+> ⚠️ **DISCLAIMER & TERMS OF USE**
+> This tool is provided for educational purposes and internal use only. By using this extension, you acknowledge that you are accessing your own data via your own authenticated session. The author(s) of this extension are not affiliated with, endorsed by, or connected to Zewail City or its IT department. 
+>
+> The author(s) assume **ZERO liability** for how you use this tool. You are solely responsible for ensuring that your use of this software complies with Zewail City's IT policies, academic guidelines, and Terms of Service. Any disciplinary actions, account restrictions, or other consequences arising from the use of this tool are strictly the responsibility of the user.
