@@ -2,14 +2,15 @@
 
 A compact browser extension and viewer that retrieves and renders unofficial transcript JSON from Zewail City SelfService. The project provides a small MV3 extension which uses the active page session to obtain the transcript payload and a sandboxed Brython viewer to render the transcript as readable tables.
 
-This README is camera-ready and concise: it documents what runs and what is used.
+<img width="2304" height="1079" alt="image_2026-06-12_23-45-09" src="https://github.com/user-attachments/assets/4cdb7db6-bd58-463b-8b41-e65c3b5fa618" />
 
 What runs
 - Browser extension (Manifest V3) located in `extension/`.
 - Background service worker: `extension/background.js`.
 - Content script: `extension/content_script.js` (runs on the SelfService domain to acquire the transcript using the page session).
 - Popup UI: `extension/popup.html` + `extension/popup.js` (triggers fetch and stores the payload in extension local storage).
-- Viewer UI: `extension/viewer.html` + `extension/viewer.js` and a sandboxed Brython preview `extension/sandbox.html` (renders payload stored in extension storage).
+- Viewer UI: `extension/viewer.html` + `extension/viewer.js
+` and a sandboxed Brython preview `extension/sandbox.html` (renders payload stored in extension storage).
 
 What is used (runtime / dependencies)
 - Brython (client-side Python runtime) — vendored files: `brython.js`, `brython_stdlib.js` (pyproject specifies `brython>=3.14.1`).
