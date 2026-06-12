@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zewail-City-Transcript-StopList-Bypasser — Sandbox Viewer</title>
+  <script src="brython.js"></script>
+  <script src="brython_stdlib.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .hero {
+      background: #0f62fe;
+      color: white;
+      padding: 18px 20px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 999px;
+      font-size: 14px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .card, .semester-card, .org-card {
+      background: white;
+      border: 1px solid #d7dde8;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(31, 41, 55, 0.06);
+    }
+    .card { padding: 14px; }
+    .label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: .06em; }
+    .value { margin-top: 6px; font-size: 18px; font-weight: 700; }
+    .semester-card { padding: 16px; margin-bottom: 16px; }
+    .org-card { padding: 12px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+    th { background: #e8f0fe; }
+    .muted { color: #6b7280; }
+    .error { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; padding: 12px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Zewail-City-Transcript-StopList-Bypasser</h1>
+      <div>Sandboxed viewer for Brython-based transcript rendering</div>
+      <div id="status" class="status">Loading…</div>
+    </div>
+
+    <div id="content"></div>
+  </div>
+
+  <script>
+    (function () {
+      const status = document.getElementById('status');
+      chrome.storage.local.get(['transcript_payload'], function (items) {
+        window.__EXT_TRANSCRIPT = (items && items.transcript_payload) ? items.transcript_payload : null;
+        chrome.storage.local.remove(['transcript_payload']);
+        status.textContent = window.__EXT_TRANSCRIPT ? 'Transcript loaded' : 'No payload found';
+        if (typeof brython === 'function') {
+          brython();
+        }
+      });
+    })();
+  </script>
+
+  <script type="text/python">
+from browser import document, window, html
+from main import parse_response_text, build_transcript_view_model
+
+
+def set_status(text):
+    try:
+        document['status'].text = text
+    except Exception:
+        pass
+
+
+def card(label, value):
+    c = html.DIV(Class='card')
+    c <= html.DIV(label, Class='label')
+    c <= html.DIV(value or '—', Class='value')
+    return c
+
+
+def render_table(courses):
+    table = html.TABLE()
+    table <= html.TR(html.TH('Code'), html.TH('Course'), html.TH('Type'), html.TH('Credits'), html.TH('Grade'), html.TH('QP'))
+    for course in courses:
+        table <= html.TR(
+            html.TD(course.get('course_id', '')),
+            html.TD(course.get('course_name', '')),
+            html.TD(course.get('subtype', '')),
+            html.TD(course.get('credits', '')),
+            html.TD(course.get('grade', '')),
+            html.TD(course.get('quality_points', '')),
+        )
+    return table
+
+
+def render_vm(vm):
+    content = document['content']
+    content.clear()
+
+    summary = html.DIV(Class='summary-grid')
+    summary <= card('Student', vm.get('student_name', ''))
+    summary <= card('Institution', vm.get('institution', ''))
+    summary <= card('Cumulative GPA', vm.get('cumulative_gpa', ''))
+    content <= summary
+
+    for semester in vm.get('semesters', []):
+        sem = html.DIV(Class='semester-card')
+        sem <= html.H2(semester.get('period', ''))
+        gpa = semester.get('gpa', {})
+        sem <= html.DIV(
+            f"Term GPA: {gpa.get('term_gpa', '—')} | Overall GPA: {gpa.get('overall_gpa', '—')}",
+            Class='muted'
+        )
+        for org in semester.get('organizations', []):
+            org_card = html.DIV(Class='org-card')
+            org_card <= html.H3(org.get('name', ''))
+            org_card <= render_table(org.get('courses', []))
+            sem <= org_card
+        content <= sem
+
+
+def main():
+    text = getattr(window, '__EXT_TRANSCRIPT', None)
+    if not text:
+        document['content'] <= html.DIV('No transcript payload found. Use the popup to fetch from the SelfService site.', Class='error')
+        set_status('No payload found')
+        return
+
+    try:
+        payload = parse_response_text(text)
+        vm = build_transcript_view_model(payload)
+        render_vm(vm)
+        set_status('Transcript rendered')
+    except Exception as exc:
+        document['content'] <= html.DIV('Failed to parse transcript: ' + str(exc), Class='error')
+        set_status('Parse failed')
+
+
+main()
+  </script>
+</body>
+</html>
+

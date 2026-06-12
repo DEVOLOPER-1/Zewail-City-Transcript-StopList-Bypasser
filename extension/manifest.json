@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Zewail-City-Transcript-StopList-Bypasser",
+  "version": "0.1.0",
+  "description": "Fetch unofficial transcript JSON from Zewail City SelfService and render it.",
+  "permissions": ["storage", "tabs", "activeTab"],
+  "host_permissions": [
+    "https://sisselfservice.zewailcity.edu.eg/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Transcript Viewer",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://sisselfservice.zewailcity.edu.eg/*"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon48.png"
+  }
+}
+
